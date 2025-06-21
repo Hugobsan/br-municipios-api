@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Contracts\MunicipalityProviderInterface;
+use Illuminate\Support\Facades\Cache;
 
 class MunicipalityService
 {
@@ -12,6 +13,10 @@ class MunicipalityService
 
     public function listByUf(string $uf): array
     {
-        return $this->provider->listByUf($uf);
+        $uf = strtolower($uf);
+        $key = "municipios_{$uf}";
+        $ttl = config('services.municipality_providers.cache_ttl', 86400);
+
+        return Cache::remember($key, $ttl, fn() => $this->provider->listByUf($uf));
     }
 }
