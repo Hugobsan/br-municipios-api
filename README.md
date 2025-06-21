@@ -14,7 +14,7 @@ API RESTful para consulta de informações sobre municípios brasileiros, desenv
 
 ## 🚀 Instalação e Deploy
 
-<details>
+<details open>
 <summary><strong>🐳 Docker (Recomendado)</strong></summary>
 
 ### Pré-requisitos
