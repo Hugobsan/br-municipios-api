@@ -17,16 +17,10 @@ services:
       - br-municipios-api
     depends_on:
       - redis
+    env_file:
+      - .env.docker
     environment:
-      - APP_ENV=local
-      - APP_DEBUG=true
-      - DB_CONNECTION=sqlite
-      - CACHE_DRIVER=redis
-      - SESSION_DRIVER=redis
-      - QUEUE_CONNECTION=redis
       - REDIS_HOST=redis
-      - REDIS_PASSWORD=null
-      - REDIS_PORT=6379
 
   # Servidor Web (Nginx)
   webserver:
