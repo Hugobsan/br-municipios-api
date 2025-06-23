@@ -300,3 +300,225 @@ O projeto está configurado para usar:
 - **Timezone**: America/Sao_Paulo
 - **PHP 8.4** com extensões necessárias
 - **Laravel 12** com otimizações de produção
+
+## 📖 Documentação da API
+
+### Endpoint Principal
+
+#### Listar Municípios por UF
+
+```http
+GET /api/municipios/{uf}
+```
+
+**Parâmetros:**
+- `uf` (string, obrigatório): Código da Unidade Federativa (2 letras)
+  - Aceita tanto maiúsculo quanto minúsculo
+  - Exemplos válidos: `SP`, `sp`, `RJ`, `rj`
+
+**Resposta de Sucesso (200):**
+
+```json
+{
+  "data": [
+    {
+      "name": "São Paulo",
+      "ibge_code": "3550308"
+    },
+    {
+      "name": "Campinas", 
+      "ibge_code": "3509502"
+    },
+    {
+      "name": "Santos",
+      "ibge_code": "3548500"
+    }
+  ]
+}
+```
+
+**Resposta de Erro (500):**
+
+```json
+{
+  "error": "Não foi possível obter a lista de municípios",
+  "message": "Detalhes específicos do erro"
+}
+```
+
+**Resposta com Lista Vazia (200):**
+
+```json
+{
+  "data": []
+}
+```
+### Características da API
+
+- **Cache Inteligente**: Dados são armazenados em cache Redis por 1 hora
+- **Fallback Robusto**: Utiliza múltiplos provedores (IBGE e BrasilAPI) 
+- **Retry Logic**: Tentativas automáticas em caso de falha temporária
+- **Formato Padronizado**: Resposta sempre no mesmo formato independente do provedor
+- **Case Insensitive**: Aceita UF em maiúsculo ou minúsculo
+- **Validação**: Validação automática do formato da UF (2 letras)
+
+### Performance
+
+- **Cache Hit**: <1ms (dados do Redis)
+- **Cache Miss**: ~200-500ms (primeira consulta + cache)
+- **Fallback**: ~1-2s (em caso de falha do provedor principal)
+
+### Limitações
+
+- Não há rate limiting implementado
+- Apenas consulta por UF (não por município específico)
+- Dependente de APIs externas (IBGE e BrasilAPI)
+
+## 🧪 Testes
+
+### Executar Testes
+
+```bash
+# Com Docker (recomendado)
+make test
+
+# Diretamente com PHPUnit
+./vendor/bin/phpunit
+```
+### Cobertura de Testes
+
+O projeto possui **12 testes** cobrindo os pontos críticos:
+
+#### Testes Unitários (7 testes)
+
+- **MunicipalityService**: Cache, fallback, retry, tratamento de erros
+- **MunicipalityProviders**: Formatação de dados, tratamento de falhas HTTP
+
+#### Testes de Feature (5 testes)
+
+- **MunicipalityController**: Validação, tratamento de erros, respostas HTTP
+- **MunicipalityServiceIntegration**: Fluxo completo end-to-end com fallback
+
+### Estrutura de Testes
+
+```bash
+tests/
+├── Feature/
+│   ├── MunicipalityControllerTest.php    # Testes da API
+│   └── MunicipalityServiceIntegrationTest.php  # Testes de integração
+└── Unit/
+    ├── MunicipalityServiceTest.php       # Testes da lógica de negócio
+    └── MunicipalityProvidersTest.php     # Testes dos provedores externos
+```
+
+### Cenários Testados
+
+- ✅ Cache hit/miss
+- ✅ Fallback entre provedores
+- ✅ Retry automático
+- ✅ Tratamento de erros HTTP
+- ✅ Validação de parâmetros
+- ✅ Formatação de respostas
+- ✅ Integração end-to-end
+
+## 🏗️ Arquitetura
+
+### Visão Geral
+
+A API segue uma arquitetura em camadas com princípios SOLID e padrões de design bem definidos:
+
+```bash
+┌─────────────────┐
+│   Controller    │  ← Validação e tratamento HTTP
+└─────────────────┘
+         │
+┌─────────────────┐
+│     Facade      │  ← Interface simplificada
+└─────────────────┘
+         │
+┌─────────────────┐
+│    Service      │  ← Lógica de negócio, cache, retry
+└─────────────────┘
+         │
+┌─────────────────┐
+│   Providers     │  ← Integração com APIs externas
+└─────────────────┘
+         │
+┌─────────────────┐
+│   APIs (IBGE,   │  ← Fontes de dados
+│   BrasilAPI)    │
+└─────────────────┘
+```
+
+### Componentes Principais
+
+#### 1. Controller Layer
+
+- **MunicipalityController**: Entrada da API, validação de parâmetros
+- Tratamento de exceções e formatação de respostas HTTP
+
+#### 2. Service Layer
+
+- **MunicipalityService**: Lógica de negócio principal
+- Gerenciamento de cache (Redis)
+- Implementação de retry e fallback
+- Coordenação entre providers
+
+#### 3. Provider Layer
+
+- **IbgeMunicipalityProvider**: Integração com API do IBGE
+- **BrasilApiMunicipalityProvider**: Integração com BrasilAPI
+- Interface comum: **MunicipalityProviderInterface**
+
+#### 4. Supporting Components
+
+- **MunicipalityProviderEnum**: Gestão e instanciação de providers
+- **MunicipalityResource**: Formatação de dados de saída
+- **Municipality Facade**: Interface simplificada para o service
+
+### Fluxo de Dados
+
+1. **Request** chega no **Controller**
+2. **Controller** valida parâmetros e chama **Facade**
+3. **Facade** delega para singleton do **Service** associado
+4. **Service** verifica **Cache** (Redis)
+5. Se cache miss, **Service** tenta **Provider** principal
+6. Em caso de falha, **Service** implementa **retry** (3x por padrão)
+7. Se continuar falhando, **Service** usa **fallback** (outros providers)
+8. **Provider** faz requisição HTTP e formata dados
+9. **Service** armazena resultado no **Cache**
+10. **Response** é formatada pelo **Resource** e retornada
+
+### Padrões Implementados
+
+- **Repository Pattern**: Providers como repositórios de dados externos
+- **Facade Pattern**: Interface simplificada para o service
+- **Strategy Pattern**: Enum para seleção dinâmica de providers
+- **Circuit Breaker**: Retry com fallback automático
+- **Dependency Injection**: IoC container do Laravel
+- **Resource Pattern**: Formatação consistente de respostas
+
+### Configurações
+
+#### Cache (Redis)
+
+- **TTL**: 2592000 segundos (30 dias)
+   A lista de cidades é um dado com frequência de variação extremamente baixa, o que justificaria um TTL até maior, garantindo ainda assim a confiabilidade. Contudo, para evitar que os dados de estados poucos requisitados continuem na memória consumindo recursos, o TTL foi definido para 30 dias. Vale ressaltar que mesmo se todos os municípios fossem armazenados em cache, resultaria em um consumo de menos de 1mb de memória, por esse motivo, o TTL pode ser configurável via .env para diferentes trade-offs.
+
+- **Key Pattern**: `municipios_{uf}`
+- **Driver**: Redis (configurável via `.env`)
+
+#### Providers
+
+- **Primary**: BrasilAPI
+- **Fallback**: IBGE
+- **Extensível**: Fácil adição de novos providers
+   Basta criar o novo service do provider de municipios e registrá-lo no enum `MunicipalityProviderEnum`.
+
+### Vantagens da Arquitetura
+
+- **Escalabilidade**: Fácil adição de novos providers
+- **Confiabilidade**: Múltiplos pontos de falha cobertos
+- **Performance**: Cache inteligente reduz latência
+- **Manutenibilidade**: Separação clara de responsabilidades
+- **Testabilidade**: Cada camada pode ser testada isoladamente
