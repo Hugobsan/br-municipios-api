@@ -36,8 +36,8 @@ return [
     ],
 
     'municipality_providers' => [
-        'brasilapi' => 'https://brasilapi.com.br/api/ibge/municipios/v1/',
-        'ibge' => 'https://servicodados.ibge.gov.br/api/v1/localidades/estados/',
         'cache_ttl' => env('MUNICIPALITY_CACHE_TTL', 86400),
+        'retry_delay_ms' => env('MUNICIPALITY_RETRY_DELAY_MS', 200),
+        'max_retries' => env('MUNICIPALITY_MAX_RETRIES', 3),
     ],
 ];

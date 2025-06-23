@@ -4,31 +4,29 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use App\Contracts\MunicipalityProviderInterface;
-use App\Services\Providers\IbgeMunicipalityProvider;
-use App\Services\Providers\BrasilApiMunicipalityProvider;
 use App\Services\MunicipalityService;
+use App\Enums\MunicipalityProviderEnum;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
-        $this->app->singleton(MunicipalityProviderInterface::class, fn() => match (env('MUNICIPALITY_PROVIDER')) {
-            'ibge' => new IbgeMunicipalityProvider(),
-            'brasilapi' => new BrasilApiMunicipalityProvider(),
-            default => throw new \InvalidArgumentException('Provider inválido'),
-        });
+        $this->app->singleton(
+            MunicipalityProviderInterface::class,
+            fn() =>
+            MunicipalityProviderEnum::fromString(env('MUNICIPALITY_PROVIDER', 'brasilapi'))->createInstance()
+        );
 
-        $this->app->singleton(MunicipalityService::class, fn($app) =>
-            new MunicipalityService($app->make(MunicipalityProviderInterface::class))
+        $this->app->singleton(
+            MunicipalityService::class,
+            fn($app) =>
+            new MunicipalityService(
+                $app->make(MunicipalityProviderInterface::class),
+                MunicipalityProviderEnum::getAllInstances()
+            )
         );
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         //
