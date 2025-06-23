@@ -67,13 +67,15 @@ jobs:
             sudo cp -r . ../backup-$(date +%Y%m%d-%H%M%S) || true
             
             # Atualizar código
-            git pull origin main
+            git fetch
+            git reset --hard origin/main
             
             # Parar containers atuais
             make down || true
             
             # Rebuild e restart com Docker
-            make restart
+            make rebuild
+            make up
             
             # Executar migrações via container
             make migrate
