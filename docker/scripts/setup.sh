@@ -2,6 +2,9 @@
 
 echo "=== Configurando ambiente Laravel 12 para Docker ==="
 
+echo "Instalando dependências do Composer..."
+composer install --no-interaction --prefer-dist --optimize-autoloader
+
 # Aguardar os serviços ficarem prontos
 echo "Aguardando Redis ficar pronto..."
 sleep 10

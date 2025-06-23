@@ -50,9 +50,6 @@ COPY ./docker/php/local.ini /usr/local/etc/php/conf.d/local.ini
 # Copiar arquivos do projeto
 COPY . /var/www
 
-# Instalar dependências do Composer
-RUN composer install --no-dev --optimize-autoloader --no-interaction
-
 # Dar permissões apropriadas
 RUN chown -R $user:$user /var/www
 RUN chmod -R 775 /var/www/storage

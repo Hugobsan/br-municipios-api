@@ -73,8 +73,7 @@ jobs:
             make down || true
             
             # Rebuild e restart com Docker
-            make rebuild
-            make up
+            make restart
             
             # Executar migrações via container
             make migrate
