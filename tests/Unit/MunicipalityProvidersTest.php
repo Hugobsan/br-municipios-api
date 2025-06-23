@@ -2,11 +2,11 @@
 
 namespace Tests\Unit;
 
-use Tests\TestCase;
-use App\Services\Providers\IbgeMunicipalityProvider;
 use App\Services\Providers\BrasilApiMunicipalityProvider;
-use Illuminate\Support\Facades\Http;
+use App\Services\Providers\IbgeMunicipalityProvider;
 use Exception;
+use Illuminate\Support\Facades\Http;
+use Tests\TestCase;
 
 class MunicipalityProvidersTest extends TestCase
 {
@@ -15,14 +15,14 @@ class MunicipalityProvidersTest extends TestCase
         // Arrange
         $mockResponse = [
             ['id' => 3550308, 'nome' => 'São Paulo'],
-            ['id' => 3509502, 'nome' => 'Campinas']
+            ['id' => 3509502, 'nome' => 'Campinas'],
         ];
 
         Http::fake([
-            'servicodados.ibge.gov.br/*' => Http::response($mockResponse, 200)
+            'servicodados.ibge.gov.br/*' => Http::response($mockResponse, 200),
         ]);
 
-        $provider = new IbgeMunicipalityProvider();
+        $provider = new IbgeMunicipalityProvider;
 
         // Act
         $result = $provider->listByUf('SP');
@@ -38,14 +38,14 @@ class MunicipalityProvidersTest extends TestCase
         // Arrange
         $mockResponse = [
             ['codigo_ibge' => 3550308, 'nome' => 'São Paulo'],
-            ['codigo_ibge' => 3509502, 'nome' => 'Campinas']
+            ['codigo_ibge' => 3509502, 'nome' => 'Campinas'],
         ];
 
         Http::fake([
-            'brasilapi.com.br/*' => Http::response($mockResponse, 200)
+            'brasilapi.com.br/*' => Http::response($mockResponse, 200),
         ]);
 
-        $provider = new BrasilApiMunicipalityProvider();
+        $provider = new BrasilApiMunicipalityProvider;
 
         // Act
         $result = $provider->listByUf('SP');
@@ -60,10 +60,10 @@ class MunicipalityProvidersTest extends TestCase
     {
         // Arrange
         Http::fake([
-            '*' => Http::response(null, 500)
+            '*' => Http::response(null, 500),
         ]);
 
-        $ibgeProvider = new IbgeMunicipalityProvider();
+        $ibgeProvider = new IbgeMunicipalityProvider;
 
         // Act & Assert
         $this->expectException(Exception::class);

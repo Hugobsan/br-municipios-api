@@ -18,12 +18,13 @@ enum MunicipalityProviderEnum: string
     public function createInstance(): \App\Contracts\MunicipalityProviderInterface
     {
         $class = $this->getProviderClass();
-        return new $class();
+
+        return new $class;
     }
 
     public static function getAllInstances(): array
     {
-        return array_map(fn($case) => $case->createInstance(), self::cases());
+        return array_map(fn ($case) => $case->createInstance(), self::cases());
     }
 
     public static function fromString(string $provider): self

@@ -2,13 +2,13 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Services\MunicipalityService;
-use App\Services\Providers\IbgeMunicipalityProvider;
 use App\Services\Providers\BrasilApiMunicipalityProvider;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Cache;
+use App\Services\Providers\IbgeMunicipalityProvider;
 use Exception;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
+use Tests\TestCase;
 
 class MunicipalityServiceIntegrationTest extends TestCase
 {
@@ -24,14 +24,14 @@ class MunicipalityServiceIntegrationTest extends TestCase
         Http::fake([
             'servicodados.ibge.gov.br/*' => Http::response(null, 500), // IBGE fails
             'brasilapi.com.br/*' => Http::response([
-                ['codigo_ibge' => 3550308, 'nome' => 'São Paulo']
-            ], 200) // BrasilAPI succeeds
+                ['codigo_ibge' => 3550308, 'nome' => 'São Paulo'],
+            ], 200), // BrasilAPI succeeds
         ]);
 
-        $ibgeProvider = new IbgeMunicipalityProvider();
-        $brasilApiProvider = new BrasilApiMunicipalityProvider();
+        $ibgeProvider = new IbgeMunicipalityProvider;
+        $brasilApiProvider = new BrasilApiMunicipalityProvider;
         $providers = [$ibgeProvider, $brasilApiProvider];
-        
+
         $service = new MunicipalityService($ibgeProvider, $providers);
 
         // Act
@@ -47,19 +47,19 @@ class MunicipalityServiceIntegrationTest extends TestCase
     {
         // Arrange
         Http::fake([
-            '*' => Http::response(null, 500) // All providers fail
+            '*' => Http::response(null, 500), // All providers fail
         ]);
 
-        $ibgeProvider = new IbgeMunicipalityProvider();
-        $brasilApiProvider = new BrasilApiMunicipalityProvider();
+        $ibgeProvider = new IbgeMunicipalityProvider;
+        $brasilApiProvider = new BrasilApiMunicipalityProvider;
         $providers = [$ibgeProvider, $brasilApiProvider];
-        
+
         $service = new MunicipalityService($ibgeProvider, $providers);
 
         // Act & Assert
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Não foi possível obter a lista de municípios');
-        
+
         $service->listByUf('SP');
     }
 }

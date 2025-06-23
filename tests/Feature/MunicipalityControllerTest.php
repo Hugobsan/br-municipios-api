@@ -2,10 +2,9 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Services\MunicipalityService;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class MunicipalityControllerTest extends TestCase
 {
@@ -21,7 +20,7 @@ class MunicipalityControllerTest extends TestCase
         $uf = 'sp';
         $expectedData = [
             ['name' => 'São Paulo', 'ibge_code' => '3550308'],
-            ['name' => 'Campinas', 'ibge_code' => '3509502']
+            ['name' => 'Campinas', 'ibge_code' => '3509502'],
         ];
 
         // Mock the service to return expected data
@@ -41,9 +40,9 @@ class MunicipalityControllerTest extends TestCase
                 'data' => [
                     '*' => [
                         'name',
-                        'ibge_code'
-                    ]
-                ]
+                        'ibge_code',
+                    ],
+                ],
             ])
             ->assertJsonCount(2, 'data');
     }
@@ -62,7 +61,7 @@ class MunicipalityControllerTest extends TestCase
         $this->mock(MunicipalityService::class, function ($mock) {
             $mock->shouldReceive('listByUf')->andReturn([]);
         });
-        
+
         $response = $this->getJson('/api/municipios/sp');
         $response->assertStatus(200);
     }

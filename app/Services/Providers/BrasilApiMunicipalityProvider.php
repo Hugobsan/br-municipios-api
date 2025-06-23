@@ -3,9 +3,9 @@
 namespace App\Services\Providers;
 
 use App\Contracts\MunicipalityProviderInterface;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Client\RequestException;
 use Exception;
+use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Facades\Http;
 
 class BrasilApiMunicipalityProvider implements MunicipalityProviderInterface
 {
@@ -13,10 +13,10 @@ class BrasilApiMunicipalityProvider implements MunicipalityProviderInterface
 
     public function listByUf(string $uf): array
     {
-        $url = self::BASE_URL . strtoupper($uf);
+        $url = self::BASE_URL.strtoupper($uf);
         $response = Http::timeout(30)->get($url);
 
-        if (!$response->successful()) {
+        if (! $response->successful()) {
             throw new RequestException($response);
         }
 
@@ -26,7 +26,7 @@ class BrasilApiMunicipalityProvider implements MunicipalityProviderInterface
             throw new Exception('Resposta vazia do provedor BrasilAPI');
         }
 
-        return collect($data)->map(fn($item) => [
+        return collect($data)->map(fn ($item) => [
             'name' => $item['nome'],
             'ibge_code' => $item['codigo_ibge'],
         ])->toArray();

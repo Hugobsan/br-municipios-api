@@ -3,9 +3,9 @@
 namespace App\Services\Providers;
 
 use App\Contracts\MunicipalityProviderInterface;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Client\RequestException;
 use Exception;
+use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Facades\Http;
 
 class IbgeMunicipalityProvider implements MunicipalityProviderInterface
 {
@@ -13,10 +13,10 @@ class IbgeMunicipalityProvider implements MunicipalityProviderInterface
 
     public function listByUf(string $uf): array
     {
-        $url = self::BASE_URL . strtolower($uf) . '/municipios';
+        $url = self::BASE_URL.strtolower($uf).'/municipios';
         $response = Http::timeout(30)->get($url);
 
-        if (!$response->successful()) {
+        if (! $response->successful()) {
             throw new RequestException($response);
         }
 
@@ -26,7 +26,7 @@ class IbgeMunicipalityProvider implements MunicipalityProviderInterface
             throw new Exception('Resposta vazia do provedor IBGE');
         }
 
-        return collect($data)->map(fn($item) => [
+        return collect($data)->map(fn ($item) => [
             'name' => $item['nome'],
             'ibge_code' => $item['id'],
         ])->toArray();

@@ -2,11 +2,11 @@
 
 namespace Tests\Unit;
 
-use Tests\TestCase;
-use App\Services\MunicipalityService;
 use App\Contracts\MunicipalityProviderInterface;
-use Illuminate\Support\Facades\Cache;
+use App\Services\MunicipalityService;
 use Exception;
+use Illuminate\Support\Facades\Cache;
+use Tests\TestCase;
 
 class MunicipalityServiceTest extends TestCase
 {
@@ -23,7 +23,7 @@ class MunicipalityServiceTest extends TestCase
         $service = new MunicipalityService($mockProvider, [$mockProvider]);
         $uf = 'sp';
         $cachedData = [['name' => 'São Paulo', 'ibge_code' => '3550308']];
-        
+
         Cache::put("municipios_{$uf}", $cachedData, 3600);
 
         // Act
@@ -38,7 +38,7 @@ class MunicipalityServiceTest extends TestCase
         // Arrange
         $mockPrimaryProvider = $this->createMock(MunicipalityProviderInterface::class);
         $mockAlternativeProvider = $this->createMock(MunicipalityProviderInterface::class);
-        
+
         $expectedData = [['name' => 'São Paulo', 'ibge_code' => '3550308']];
         $uf = 'sp';
 
@@ -68,7 +68,7 @@ class MunicipalityServiceTest extends TestCase
         // Arrange
         $mockPrimaryProvider = $this->createMock(MunicipalityProviderInterface::class);
         $mockAlternativeProvider = $this->createMock(MunicipalityProviderInterface::class);
-        
+
         $uf = 'sp';
 
         // Both providers fail
@@ -86,7 +86,7 @@ class MunicipalityServiceTest extends TestCase
         // Act & Assert
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Não foi possível obter a lista de municípios');
-        
+
         $service->listByUf($uf);
     }
 }

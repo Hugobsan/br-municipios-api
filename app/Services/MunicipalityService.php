@@ -3,12 +3,13 @@
 namespace App\Services;
 
 use App\Contracts\MunicipalityProviderInterface;
-use Illuminate\Support\Facades\Cache;
 use Exception;
+use Illuminate\Support\Facades\Cache;
 
 class MunicipalityService
 {
     protected array $providers;
+
     protected int $currentProviderIndex = 0;
 
     public function __construct(
@@ -25,7 +26,7 @@ class MunicipalityService
         $key = "municipios_{$uf}";
         $ttl = config('services.municipality_providers.cache_ttl', 86400);
 
-        return Cache::remember($key, $ttl, fn() => $this->fetchMunicipalities($uf));
+        return Cache::remember($key, $ttl, fn () => $this->fetchMunicipalities($uf));
     }
 
     protected function fetchMunicipalities(string $uf): array
@@ -53,7 +54,7 @@ class MunicipalityService
             try {
                 $result = $provider->listByUf($uf);
 
-                if (!empty($result)) {
+                if (! empty($result)) {
                     return $result;
                 }
             } catch (Exception $e) {
@@ -77,7 +78,7 @@ class MunicipalityService
             try {
                 $result = $provider->listByUf($uf);
 
-                if (!empty($result)) {
+                if (! empty($result)) {
                     return $result;
                 }
             } catch (Exception $e) {
